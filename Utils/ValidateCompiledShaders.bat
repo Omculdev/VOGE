@@ -1,0 +1,3 @@
+C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\External\vulkansdk\1.4.363.0\Bin\spirv-val.exe "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\CompiledShaders\VertexShader.spv" --relax-block-layout --target-env vulkan1.4
+C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\External\vulkansdk\1.4.363.0\Bin\spirv-val.exe "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\CompiledShaders\FragmentShader.spv" --relax-block-layout --target-env vulkan1.4
+pause

@@ -1,0 +1,3 @@
+C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\External\vulkansdk\1.4.363.0\Bin\glslc.exe "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\RawShaders\VertexShader.vert" -o "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\CompiledShaders\VertexShader.spv"
+C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\External\vulkansdk\1.4.363.0\Bin\glslc.exe "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\RawShaders\FragmentShader.frag" -o "C:\Users\Roma\source\repos\VulkanOGE\VulkanOGE\Src\CompiledShaders\FragmentShader.spv"
+pause
