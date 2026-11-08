@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\SourceCode\Utils\General\Logger.cpp" />
+    <ClCompile Include="Src\SourceCode\VulkanWrappers\Providers\DebugMessenger.cpp" />
     <ClCompile Include="Src\SourceCode\VulkanWrappers\Providers\Instance.cpp" />
     <ClCompile Include="Src\VulkanTest.cpp" />
   </ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="Src\Headers\Utils\General\Logger.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\CurrentFunctionSignature.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\DebugMacros.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\Providers\DebugMessenger.hpp" />
     <ClInclude Include="Src\Headers\VulkanWrappers\Providers\Instance.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

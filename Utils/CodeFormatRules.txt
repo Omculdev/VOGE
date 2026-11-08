@@ -1,0 +1,35 @@
+---CODE RULES---
+---HEADERS---
+1) all class members and methods should be grouped by usage (e.g. init, constructors)
+2) there should always be a endline between 2 usage groups
+3) if the row cannot is longer than 200 characters it should be split
+4) the parameters in functions and methods should only come in order in which they are found in vulkan-core.h
+5) there should be no endline between the access specifier and the code
+6) most methods that have a return value should be specified as [[nodiscard]] unless there is an exception
+7) operators always come before functions in a single usage group
+8) vulkan wrappers should only have 3 init methods - vulkan structure and all members of a vulkan structure separately and 1 optional for simpler initialization
+9) classes are used for normal data where methods are required, structs are used for POD
+10) no c++ standart types should be used (should be replaced with Types.hpp) unless there is a valid reason (int, long, long long, double etc) not including the standart template library
+11) const methods always come after non-const
+12) every class member must have its own line
+13) members with additional specifiers should always be declared first in a single usage group
+14) methods should always come after members
+15) public always comes after protected which always comes after private
+16) UPPER_CASE is used for macros, snake_case for variables, camelCase for members and PascalCase for class and struct names 
+17) if a parameter is larger than 16 bytes it should be passed by const ref, otherwise using copy unless the class has its copy constructor deleted
+18) parameters use K&R style of braces
+---SOURCE-CODE---
+1) all functions and methods should be defined in the order they were declared in .hpp
+2) all parameters should have identical names and order as in .hpp
+3) there must be an 3 endlines between 2 functions or methods
+4) functions and methods should be logically separated into smaller pieces inside of a single function which are separated by a single endline
+5) a return type should always be fully specified for lambdas
+6) avoid using auto whenever possible except for "range-for" loops where it is recommended to use auto
+7) vulkan structures should be initialized in the order in which they are defined in vulkan-core.h
+8) any creation/destruction function should always have a LOG_INFO on start and finish
+9) Parameters and definitions use K&R style of braces
+10) Parameters in functions should be separated by a space
+11) Parameters in operators should be separated by a space
+12) Single line statements must still have braces (e.g. if (a == b) doThis(); is not considered a good practice)
+---OTHER---
+1) all rules for source code apply for functions and methods defined in .hpp

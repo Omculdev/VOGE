@@ -4,6 +4,7 @@
     <ClCompile Include="Src\VulkanTest.cpp" />
     <ClCompile Include="Src\SourceCode\VulkanWrappers\Providers\Instance.cpp" />
     <ClCompile Include="Src\SourceCode\Utils\General\Logger.cpp" />
+    <ClCompile Include="Src\SourceCode\VulkanWrappers\Providers\DebugMessenger.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Headers\Calculations\General\Types.hpp" />
@@ -12,5 +13,6 @@
     <ClInclude Include="Src\Headers\Utils\General\Logger.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\DebugMacros.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\CurrentFunctionSignature.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\Providers\DebugMessenger.hpp" />
   </ItemGroup>
 </Project>

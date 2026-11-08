@@ -833,7 +833,9 @@ public:
 		cleanUp();
 	}
 };
+#include "Utils/General/Logger.hpp"
 int main() {
+	Logger::getInstance().init();
 	Application app;
 	try {
 		app.run();
