@@ -14,5 +14,7 @@
     <ClInclude Include="Src\Headers\Utils\Macros\DebugMacros.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\CurrentFunctionSignature.hpp" />
     <ClInclude Include="Src\Headers\VulkanWrappers\Providers\DebugMessenger.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\Devices\PhysicalDevice.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\General\DebugContext.hpp" />
   </ItemGroup>
 </Project>

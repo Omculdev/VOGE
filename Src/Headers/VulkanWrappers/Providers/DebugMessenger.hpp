@@ -6,11 +6,11 @@
 #include <span>
 #include <optional>
 #include "VulkanWrappers/Providers/Instance.hpp"
+#include "VulkanWrappers/General/DebugContext.hpp"
 
-class DebugMessenger {
+class DebugMessenger : public DebugContext<DebugMessenger> {
 private:
-	static inline u64 object_number = {};
-	std::optional<DebugInfo> debug_info = {};
+	friend class DebugContext<DebugMessenger>;
 
 	const Instance* creation_instance_pointer = {};
 
@@ -19,9 +19,16 @@ private:
 
 	VkDebugUtilsMessengerEXT vulkan_debug_messenger = {};
 
+	[[nodiscard]] b8 basicInit(
+		const std::string& caller_sig,
+		const Instance& instance, 
+		const VkDebugUtilsMessengerCreateInfoEXT& debug_messenger_creation_info
+	);
+	[[nodiscard]] b8 basicDestroy() noexcept;
+
+	[[nodiscard]] b8 debugExtensionSupported(const Instance& instance) const;
 	void findDebugMessengerCreationFunction(const Instance& instance);
 	void findDebugMessengerDestuctionFunction(const Instance& instance);
-	[[nodiscard]] b8 debugExtensionSupported(const Instance& instance) const;
 public:
 	DebugMessenger() = default;
 	DebugMessenger(const DebugMessenger& other) = delete;
@@ -30,24 +37,24 @@ public:
 	DebugMessenger& operator=(DebugMessenger&& other) noexcept;
 	~DebugMessenger() noexcept;
 
-	void init(const Instance& instace, const VkDebugUtilsMessengerCreateInfoEXT& debug_messenger_creation_info);
-	void init(
+	[[nodiscard]] b8 init(const Instance& instace, const VkDebugUtilsMessengerCreateInfoEXT& debug_messenger_creation_info);
+	[[nodiscard]] b8 init(
 		const Instance& instance,
-		VkDebugUtilsMessengerCreateFlagsEXT debug_messenger_creation_flags,
-		VkDebugUtilsMessageSeverityFlagsEXT debug_messenger_severity_flags,
-		VkDebugUtilsMessageTypeFlagsEXT debug_messenger_messenge_type,
+		VkDebugUtilsMessengerCreateFlagsEXT debug_message_creation_flags,
+		VkDebugUtilsMessageSeverityFlagsEXT debug_message_severity_flags,
+		VkDebugUtilsMessageTypeFlagsEXT debug_message_type,
 		PFN_vkDebugUtilsMessengerCallbackEXT debug_messenger_callback,
 		void* debug_messenger_user_data,
-		const void* debug_messenger_next
+		const void* debug_messenger_next = nullptr
 	);
 
-	void destroy() noexcept;
+	[[nodiscard]] b8 destroy() noexcept;
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT debug_severity_flags,
 		VkDebugUtilsMessageTypeFlagsEXT debug_message_type,
 		const VkDebugUtilsMessengerCallbackDataEXT* debug_callback_data,
-		void* debug_user_data
+		void* debug_user_data = nullptr
 	);
 
 	VkDebugUtilsMessengerEXT operator*() const;

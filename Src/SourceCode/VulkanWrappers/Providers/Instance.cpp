@@ -9,9 +9,46 @@
 
 
 
+[[nodiscard]] b8 Instance::basicInit(const std::string& caller_sig, const VkInstanceCreateInfo& instance_creation_info) {
+	u32 required_extension_count = instance_creation_info.enabledExtensionCount;
+	const c8* const* required_extension_names = instance_creation_info.ppEnabledExtensionNames;
+	std::vector<const c8*> required_extensions(required_extension_names, required_extension_names + required_extension_count);
+
+	FATAL_ASSERT(
+		caller_sig,
+		extensionsSupported(required_extensions),
+		"required extensions are not supported by current instance",
+		DebugContext<Instance>::get()
+	)
+
+	FATAL_ASSERT(
+		caller_sig,
+		vkCreateInstance(
+			&instance_creation_info,
+			nullptr,
+			&vulkan_instance
+		) == VK_SUCCESS,
+		"failed to create vkInstance object",
+		DebugContext<Instance>::get()
+	)
+
+	return true;
+}
+
+
+
+[[nodiscard]] b8 Instance::basicDestroy() noexcept {
+	vkDestroyInstance(vulkan_instance, nullptr);
+	vulkan_instance = VK_NULL_HANDLE;
+
+	return true;
+}
+
+
+
 [[nodiscard]] b8 Instance::vaildationLayersSupported(const std::vector<const c8*>& required_validation_layers) const {
 	auto format_required_validation_layer_names_string = [&](const std::string& accumulation_string, const c8* item) -> std::string {
-		return accumulation_string + " " + std::string(item);
+		return accumulation_string + "\n" + std::string(item);
 	};
 	std::string required_validation_layer_names_string = std::accumulate(
 		required_validation_layers.begin(),
@@ -20,7 +57,11 @@
 		format_required_validation_layer_names_string
 	);
 
-	LOG_INFO("checking for the availability of the following validation layers: " + required_validation_layer_names_string, debug_info.value())
+	LOG_INFO(
+		CURRENT_FUNCTION_SIGNATURE,
+		"checking for the availability of the following validation layers: " + required_validation_layer_names_string,
+		DebugContext<Instance>::get()
+	)
 
 	u32 available_validation_layer_count = 0;
 	vkEnumerateInstanceLayerProperties(&available_validation_layer_count, nullptr);
@@ -29,7 +70,7 @@
 	vkEnumerateInstanceLayerProperties(&available_validation_layer_count, available_validation_layers.data());
 
 	auto layer_properties_to_string = [&](const std::string& accumulation_string, const VkLayerProperties& layer_properties) -> std::string {
-		return accumulation_string + " " + layer_properties.layerName;
+		return accumulation_string + "\n" + layer_properties.layerName;
 	};
 	std::string available_validation_layer_names_string = std::accumulate(
 		available_validation_layers.begin(),
@@ -38,7 +79,11 @@
 		layer_properties_to_string
 	);
 
-	LOG_INFO("found the following available validation layers:" + available_validation_layer_names_string, debug_info.value())
+	LOG_INFO(
+		CURRENT_FUNCTION_SIGNATURE, 
+		"found the following available validation layers:" + available_validation_layer_names_string,
+		DebugContext<Instance>::get()
+	)
 
 	std::unordered_set<std::string> unique_required_layers(required_validation_layers.begin(), required_validation_layers.end());
 	for (const auto& available_validation_layer : available_validation_layers) {
@@ -46,7 +91,7 @@
 	}
 
 	auto format_missing_validation_layer_names_string = [&](const std::string& accumulation_string, const std::string& item) -> std::string {
-		return accumulation_string + " " + item;
+		return accumulation_string + "\n" + item;
 	};
 	std::string missing_validation_layer_names_string = std::accumulate(
 		unique_required_layers.begin(),
@@ -56,10 +101,18 @@
 	);
 
 	if (unique_required_layers.empty()) {
-		LOG_INFO("successfully found all of the following validation layers:" + required_validation_layer_names_string, debug_info.value());
+		LOG_INFO(
+			CURRENT_FUNCTION_SIGNATURE,
+			"successfully found all of the following validation layers:" + required_validation_layer_names_string,
+			DebugContext<Instance>::get()
+		);
 	}
 	else {
-		LOG_ERROR("failed to find the following validation layers: " + missing_validation_layer_names_string, debug_info.value())
+		LOG_ERROR(
+			CURRENT_FUNCTION_SIGNATURE, 
+			"failed to find the following validation layers: " + missing_validation_layer_names_string,
+			DebugContext<Instance>::get()
+		)
 	}
 
 	return unique_required_layers.empty();
@@ -69,7 +122,7 @@
 
 [[nodiscard]] b8 Instance::extensionsSupported(const std::vector<const c8*>& required_extensions) const {
 	auto format_required_extension_names_string = [&](const std::string& accumulation_string, const c8* item) -> std::string {
-		return accumulation_string + " " + std::string(item);
+		return accumulation_string + "\n" + std::string(item);
 	};
 	std::string required_extension_names_string = std::accumulate(
 		required_extensions.begin(),
@@ -78,7 +131,7 @@
 		format_required_extension_names_string
 	);
 
-	LOG_INFO("checking for the availability of the following extensions: " + required_extension_names_string, debug_info.value())
+	LOG_INFO(CURRENT_FUNCTION_SIGNATURE, "checking for the availability of the following extensions: " + required_extension_names_string, DebugContext<Instance>::get())
 
 	u32 available_extension_count = 0;
 	vkEnumerateInstanceExtensionProperties(nullptr, &available_extension_count, nullptr);
@@ -87,7 +140,7 @@
 	vkEnumerateInstanceExtensionProperties(nullptr, &available_extension_count, available_extensions.data());
 
 	auto extension_properties_to_string = [&](const std::string& accumulate_string, const VkExtensionProperties& extension_properties) -> std::string {
-		return " " + accumulate_string + " " + extension_properties.extensionName;
+		return "\n" + accumulate_string + "\n" + extension_properties.extensionName;
 	};
 	std::string available_extension_names_string = std::accumulate(
 		available_extensions.begin(),
@@ -96,7 +149,7 @@
 		extension_properties_to_string
 	);
 
-	LOG_INFO("found the following available extensions:" + available_extension_names_string, debug_info.value())
+	LOG_INFO(CURRENT_FUNCTION_SIGNATURE, "found the following available extensions:" + available_extension_names_string, DebugContext<Instance>::get())
 
 	std::unordered_set<std::string> unique_required_extensions(required_extensions.begin(), required_extensions.end());
 	for (const auto& available_extension : available_extensions) {
@@ -104,7 +157,7 @@
 	}
 
 	auto format_missing_extension_names_string = [&](const std::string& accumulation_string, const std::string& item) -> std::string {
-		return accumulation_string + " " + item;
+		return accumulation_string + "\n" + item;
 	};
 	std::string missing_extension_names_string = std::accumulate(
 		unique_required_extensions.begin(),
@@ -114,10 +167,10 @@
 	);
 
 	if (unique_required_extensions.empty()) {
-		LOG_INFO("successfully found all of the following extensions:" + required_extension_names_string, debug_info.value());
+		LOG_INFO(CURRENT_FUNCTION_SIGNATURE, "successfully found all of the following extensions:" + required_extension_names_string, DebugContext<Instance>::get());
 	}
 	else {
-		LOG_ERROR("failed to find the following extensions: " + missing_extension_names_string, debug_info.value())
+		LOG_ERROR(CURRENT_FUNCTION_SIGNATURE, "failed to find the following extensions: " + missing_extension_names_string, DebugContext<Instance>::get())
 	}
 
 	return unique_required_extensions.empty();
@@ -127,9 +180,8 @@
 
 Instance::Instance(Instance&& other) noexcept :
 	vulkan_instance(other.vulkan_instance),
-	debug_info(other.debug_info)
+	DebugContext<Instance>(std::move(other))
 {
-	other.debug_info = std::nullopt;
 	other.vulkan_instance = VK_NULL_HANDLE;
 }
 
@@ -140,9 +192,9 @@ Instance& Instance::operator=(Instance&& other) noexcept {
 		return *this;
 	}
 	vulkan_instance = other.vulkan_instance;
-	debug_info = other.debug_info;
-	other.debug_info = std::nullopt;
 	other.vulkan_instance = VK_NULL_HANDLE;
+	DebugContext<Instance>::operator=(std::move(other));
+
 	return *this;
 }
 
@@ -153,37 +205,19 @@ Instance::~Instance() noexcept {
 }
 
 
-void Instance::init(const VkInstanceCreateInfo& instance_creation_info) {
-	debug_info = DebugInfo();
-	debug_info.value().object_id = 0;
-	debug_info.value().object_number = object_number;
-	object_number++;
-
-	LOG_INFO("attempting to create vkInstance object", debug_info.value());
-	FATAL_ASSERT(!isValid(), "vkInstance object already initialized", debug_info.value())
-
-	u32 required_extension_count = instance_creation_info.enabledExtensionCount;
-	const c8* const* required_extension_names = instance_creation_info.ppEnabledExtensionNames;
-	std::vector<const c8*> required_extensions(required_extension_names, required_extension_names+required_extension_count);
-	
-	FATAL_ASSERT(extensionsSupported(required_extensions), "required extensions are not supported by current instance", debug_info.value())
-
-	FATAL_ASSERT(
-		vkCreateInstance(
-			&instance_creation_info,
-			nullptr, 
-			&vulkan_instance
-		) == VK_SUCCESS,
-		"failed to create vkInstance object",
-		debug_info.value()
-	)
-
-	LOG_INFO("successfully created vkInstance object", debug_info.value())
+[[nodiscard]] b8 Instance::init(const VkInstanceCreateInfo& instance_creation_info) {
+	return DebugContext<Instance>::initWithDebug(
+		[&]() { return basicInit(CURRENT_FUNCTION_SIGNATURE, instance_creation_info); },
+		[&]() { return isValid(); },
+		0,
+		"VkInstance",
+		CURRENT_FUNCTION_SIGNATURE
+	);
 }
 
 
 
-void Instance::init(
+[[nodiscard]] b8 Instance::init(
 	APIVersion api_version,
 	ApplcationVersion application_version,
 	EngineVersion engine_version,
@@ -233,13 +267,19 @@ void Instance::init(
 	new_instance_creation_info.enabledLayerCount = 0;
 	new_instance_creation_info.ppEnabledLayerNames = nullptr;
 
-	init(new_instance_creation_info);
+	return DebugContext<Instance>::initWithDebug(
+		[&]() { return basicInit(CURRENT_FUNCTION_SIGNATURE, new_instance_creation_info); },
+		[&]() { return isValid(); },
+		0,
+		"VkInstance",
+		CURRENT_FUNCTION_SIGNATURE
+	);
 }
 
 
 
 #ifndef NDEBUG
-void Instance::init(
+[[nodiscard]] b8 Instance::init(
 	const VkInstanceCreateInfo& instance_creation_info,
 	const VkDebugUtilsMessengerCreateInfoEXT& debug_messenger_creation_info,
 	std::span<const std::string> required_validation_layers
@@ -250,17 +290,28 @@ void Instance::init(
 	};
 	std::for_each(required_validation_layers.begin(), required_validation_layers.end(), to_c_str);
 
-	FATAL_ASSERT(vaildationLayersSupported(required_validation_layers_c_strings), "required validation layers are not supported by current instance", debug_info.value());
+	FATAL_ASSERT(
+		CURRENT_FUNCTION_SIGNATURE,
+		vaildationLayersSupported(required_validation_layers_c_strings), 
+		"required validation layers are not supported by current instance", 
+		DebugContext<Instance>::get()
+	);
 
 	VkInstanceCreateInfo new_instance_creation_info = instance_creation_info;
 	new_instance_creation_info.pNext = static_cast<const void*>(&debug_messenger_creation_info);
 	new_instance_creation_info.enabledLayerCount = static_cast<u32>(required_validation_layers_c_strings.size());
 	new_instance_creation_info.ppEnabledLayerNames = required_validation_layers_c_strings.data();
 
-	init(new_instance_creation_info);
+	return DebugContext<Instance>::initWithDebug(
+		[&]() { return basicInit(CURRENT_FUNCTION_SIGNATURE, new_instance_creation_info); },
+		[&]() { return isValid(); },
+		0,
+		"VkInstance",
+		CURRENT_FUNCTION_SIGNATURE
+	);
 }
 
-void Instance::init(
+[[nodiscard]] b8 Instance::init(
 	APIVersion api_version,
 	ApplcationVersion application_version,
 	EngineVersion engine_version,
@@ -270,7 +321,7 @@ void Instance::init(
 	std::span<const std::string> required_validation_layers,
 	VkDebugUtilsMessengerCreateFlagsEXT debug_messenger_creation_flags,
 	VkDebugUtilsMessageSeverityFlagsEXT debug_messenger_severity_flags,
-	VkDebugUtilsMessageTypeFlagsEXT debug_messenger_messenge_type,
+	VkDebugUtilsMessageTypeFlagsEXT debug_messenger_messange_type,
 	PFN_vkDebugUtilsMessengerCallbackEXT debug_messenger_callback,
 	void* debug_messenger_user_data,
 	const void* application_info_next,
@@ -312,14 +363,19 @@ void Instance::init(
 	};
 	std::for_each(required_validation_layers.begin(), required_validation_layers.end(), validation_layers_to_c_str);
 
-	FATAL_ASSERT(vaildationLayersSupported(required_validation_layers_c_strings), "required validation layers are not supported by current instance", debug_info.value());
+	FATAL_ASSERT_NO_DEBUG_INFO(
+		CURRENT_FUNCTION_SIGNATURE,
+		vaildationLayersSupported(required_validation_layers_c_strings), 
+		"required validation layers are not supported by current instance"
+		"required validation layers are not supported by current instance"
+	);
 
 	VkDebugUtilsMessengerCreateInfoEXT new_debug_messenger_creation_info = {};
 	new_debug_messenger_creation_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 	new_debug_messenger_creation_info.pNext = debug_messenger_next;
 	new_debug_messenger_creation_info.flags = debug_messenger_creation_flags;
 	new_debug_messenger_creation_info.messageSeverity = debug_messenger_severity_flags;
-	new_debug_messenger_creation_info.messageType = debug_messenger_messenge_type;
+	new_debug_messenger_creation_info.messageType = debug_messenger_messange_type;
 	new_debug_messenger_creation_info.pfnUserCallback = debug_messenger_callback;
 	new_debug_messenger_creation_info.pUserData = debug_messenger_user_data;
 
@@ -331,35 +387,50 @@ void Instance::init(
 	new_instance_creation_info.enabledExtensionCount = static_cast<u32>(required_extensions_c_strings.size());
 	new_instance_creation_info.ppEnabledExtensionNames = required_extensions_c_strings.data();
 	new_instance_creation_info.enabledLayerCount = static_cast<u32>(required_validation_layers_c_strings.size());
-	new_instance_creation_info.ppEnabledLayerNames = required_extensions_c_strings.data();
+	new_instance_creation_info.ppEnabledLayerNames = required_validation_layers_c_strings.data();
 
-	init(new_instance_creation_info);
+	return DebugContext<Instance>::initWithDebug(
+		[&]() { return basicInit(CURRENT_FUNCTION_SIGNATURE, new_instance_creation_info); },
+		[&]() { return isValid(); },
+		0,
+		"VkInstance",
+		CURRENT_FUNCTION_SIGNATURE
+	);
 }
 #endif
 
 
 
-void Instance::destroy() noexcept {
-	LOG_INFO("attempting to destroy vkInstance object", debug_info.value());
-
-	vkDestroyInstance(vulkan_instance, nullptr);
-	vulkan_instance = VK_NULL_HANDLE;
-
-	ERROR_ASSERT(!isValid(), "failed to destroy vkInstance object", debug_info.value());
-	LOG_INFO_IF(!isValid(), "successfully destroyed vkInstance object", debug_info.value());
+[[nodiscard]] b8 Instance::destroy() noexcept {
+	return destroyWithDebug(
+		[&]() { return basicDestroy(); },
+		[&]() { return isValid(); },
+		"VkInstance",
+		CURRENT_FUNCTION_SIGNATURE
+	);
 }
 
 
 
 [[nodiscard]] VkInstance Instance::operator*() const {
-	FATAL_ASSERT(isValid(), "attempted to acquire vkInstance object which turned out to be VK_NULL_HANDLE", debug_info.value());
+	FATAL_ASSERT(
+		CURRENT_FUNCTION_SIGNATURE,
+		isValid(),
+		"attempted to acquire vkInstance object which turned out to be VK_NULL_HANDLE",
+		DebugContext<Instance>::get()
+	);
 	return vulkan_instance;
 }
 
 
 
 [[nodiscard]] VkInstance Instance::get() const {
-	FATAL_ASSERT(isValid(), "attempted to acquire vkInstance object which turned out to be VK_NULL_HANDLE", debug_info.value());
+	FATAL_ASSERT(
+		CURRENT_FUNCTION_SIGNATURE,
+		isValid(),
+		"attempted to acquire vkInstance object which turned out to be VK_NULL_HANDLE",
+		DebugContext<Instance>::get()
+	);
 	return vulkan_instance;
 }
 

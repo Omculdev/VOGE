@@ -2,15 +2,15 @@
 #include "Calculations/General/Types.hpp"
 #include "vulkan/vulkan.h"
 #include "Utils/General/DebugInfo.hpp"
+#include "VulkanWrappers/General/DebugContext.hpp"
 #include <string>
 #include <span>
 #include <vector>
 #include <optional>
 
-class Instance {
+class Instance : public DebugContext<Instance> {
 private:
-	static inline u64 object_number = {};
-	std::optional<DebugInfo> debug_info = {};
+	friend class DebugContext<Instance>;
 
 	VkInstance vulkan_instance = {};
 
@@ -20,6 +20,9 @@ private:
 		u32 minor = {};
 		u32 patch = {};
 	};
+
+	[[nodiscard]] b8 basicInit(const std::string& caller_sig, const VkInstanceCreateInfo& instance_creation_info);
+	[[nodiscard]] b8 basicDestroy() noexcept;
 
 	[[nodiscard]] b8 vaildationLayersSupported(const std::vector<const c8*>& required_validation_layers) const;
 	[[nodiscard]] b8 extensionsSupported(const std::vector<const c8*>& required_extensions) const;
@@ -35,8 +38,8 @@ public:
 	Instance& operator=(Instance&& other) noexcept;
 	~Instance() noexcept;
 
-	void init(const VkInstanceCreateInfo& instance_creation_info);
-	void init(
+	[[nodiscard]] b8 init(const VkInstanceCreateInfo& instance_creation_info);
+	[[nodiscard]] b8 init(
 		APIVersion api_version,
 		ApplcationVersion application_version,
 		EngineVersion engine_version,
@@ -47,12 +50,12 @@ public:
 		const void* application_info_next = nullptr
 	);
 #ifndef NDEBUG
-	void init(
+	[[nodiscard]] b8 init(
 		const VkInstanceCreateInfo& instance_creation_info,
 		const VkDebugUtilsMessengerCreateInfoEXT& debug_messenger_creation_info, 
 		std::span<const std::string> required_validation_layers
 	);
-	void init(
+	[[nodiscard]] b8 init(
 		APIVersion api_version,
 		ApplcationVersion application_version,
 		EngineVersion engine_version,
@@ -62,7 +65,7 @@ public:
 		std::span<const std::string> required_validation_layers,
 		VkDebugUtilsMessengerCreateFlagsEXT debug_messenger_creation_flags,
 		VkDebugUtilsMessageSeverityFlagsEXT debug_messenger_severity_flags,
-		VkDebugUtilsMessageTypeFlagsEXT debug_messenger_messenge_type,
+		VkDebugUtilsMessageTypeFlagsEXT debug_messenger_messange_type,
 		PFN_vkDebugUtilsMessengerCallbackEXT debug_messenger_callback,
 		void* debug_messenger_user_data,
 		const void* application_info_next = nullptr,
@@ -70,7 +73,7 @@ public:
 	);
 #endif
 
-	void destroy() noexcept;
+	[[nodiscard]] b8 destroy() noexcept;
 
 	[[nodiscard]] VkInstance operator*() const;
 	[[nodiscard]] VkInstance get() const;

@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)External\glfw\include\GLFW\;$(ProjectDir)External\vulkansdk\1.4.363.0\Include\;$(ProjectDir)External\vulkansdk\1.4.363.0\Include\glm;$(ProjectDir)Src\Headers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -131,7 +131,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)External\glfw\include\GLFW\;$(ProjectDir)External\vulkansdk\1.4.363.0\Include\;$(ProjectDir)External\vulkansdk\1.4.363.0\Include\glm;$(ProjectDir)Src\Headers\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -152,10 +152,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Headers\Calculations\General\Types.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\General\DebugContext.hpp" />
     <ClInclude Include="Src\Headers\Utils\General\DebugInfo.hpp" />
     <ClInclude Include="Src\Headers\Utils\General\Logger.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\CurrentFunctionSignature.hpp" />
     <ClInclude Include="Src\Headers\Utils\Macros\DebugMacros.hpp" />
+    <ClInclude Include="Src\Headers\VulkanWrappers\Devices\PhysicalDevice.hpp" />
     <ClInclude Include="Src\Headers\VulkanWrappers\Providers\DebugMessenger.hpp" />
     <ClInclude Include="Src\Headers\VulkanWrappers\Providers\Instance.hpp" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include "Calculations/General/Types.hpp"
+#include <optional>
 struct DebugInfo {
-	u64 object_id = {};
-	u64 object_number = {};
+	std::optional<u64> object_id = {};
+	std::optional<u64> object_number = {};
 };

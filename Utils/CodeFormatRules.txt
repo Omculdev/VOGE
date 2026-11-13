@@ -25,7 +25,7 @@
 4) functions and methods should be logically separated into smaller pieces inside of a single function which are separated by a single endline
 5) a return type should always be fully specified for lambdas
 6) avoid using auto whenever possible except for "range-for" loops where it is recommended to use auto
-7) vulkan structures should be initialized in the order in which they are defined in vulkan-core.h
+7) vulkan structures should be initialized in the order in which they are defined in vulkan-core.h except for sType field which should always come first
 8) any creation/destruction function should always have a LOG_INFO on start and finish
 9) Parameters and definitions use K&R style of braces
 10) Parameters in functions should be separated by a space

@@ -4,25 +4,40 @@
 #include <iostream>
 #include <windows.h>
 #include <filesystem>
+#include "Utils/Macros/DebugMacros.hpp"
 std::string Logger::getCurrentSystemTime() const {
 	std::chrono::time_point now = std::chrono::system_clock::now();
 	return std::format("{:%Y-%m-%d %H-%M-%S}", now);
 }
 void Logger::basicLog(const std::string& logdata, const std::string& additional) {
 	std::string logstring = "<" + getCurrentSystemTime() + ">" + additional + logdata;
-	log_file << logstring << "\n";
+	log_file << logstring + "\n" << std::endl;
+}
+void Logger::consoleLog(const std::string& logdata, const std::string& additional) {
+	std::string logstring = "<" + getCurrentSystemTime() + ">" + additional + logdata;
+	std::cerr << logstring + "\n" << std::endl;
 }
 void Logger::logInfo(const std::string& logdata) {
 	basicLog(logdata, " [INFO] ");
+	#ifdef CONSOLE
+		#ifdef CONSOLE_VERBOSE
+	consoleLog(logdata, " [INFO] ");
+		#endif
+	#endif
 }
 void Logger::logWarning(const std::string& logdata) {
 	basicLog(logdata, " [WARNING] ");
+	#ifdef CONSOLE
+		consoleLog(logdata, " [WARNING] ");
+	#endif
 }
 void Logger::logFatal(const std::string& logdata) {
 	basicLog(logdata, " [FATAL] ");
+	consoleLog(logdata, " [FATAL] ");
 }
 void Logger::logError(const std::string& logdata) {
 	basicLog(logdata, " [ERROR] ");
+	consoleLog(logdata, " [ERROR] ");
 }
 void Logger::createLogsFolder() {
 	logInfo("createLogsFolder: Attemptring to create logs folder");

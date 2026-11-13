@@ -15,6 +15,7 @@
 #include <fstream>
 #include <vulkan/vulkan_raii.hpp>
 #include "VulkanWrappers/Providers/Instance.hpp"
+#include "VulkanWrappers/Providers/DebugMessenger.hpp"
 class Application {
 private:
 #ifdef NDEBUG
@@ -24,12 +25,13 @@ private:
 #endif
 	GLFWwindow* window_ptr = {};
 
-	VkDebugUtilsMessengerEXT debug_messenger = {};
-	const std::vector<const char*> validation_layers = {
+	const std::vector<std::string> validation_layers = {
 		"VK_LAYER_KHRONOS_validation"
 	};
 
 	Instance instance = {};
+	
+	DebugMessenger debug_messenger = {};
 
 	VkPhysicalDevice physical_device = {};
 	std::vector<const char*> required_device_extensions = {
@@ -75,27 +77,6 @@ private:
 		window_ptr = glfwCreateWindow(1000, 1000, "hello vulkan", nullptr, nullptr);
 	}
 
-	b8 checkValidationLayerSupport() {
-		u32 layercount;
-		vkEnumerateInstanceLayerProperties(&layercount, nullptr);
-
-		std::vector<VkLayerProperties> availablevalidationlayers(layercount);
-		vkEnumerateInstanceLayerProperties(&layercount, availablevalidationlayers.data());
-
-		for (const char* layername : validation_layers) {
-			b8 layerfound = false;
-			for (const VkLayerProperties& avalablelayerproperties : availablevalidationlayers) {
-				if (strcmp(avalablelayerproperties.layerName, layername) == 0) {
-					layerfound = true;
-				}
-			}
-			if (!layerfound) {
-				return false;
-			}
-		}
-		return true;
-	}
-
 	std::vector<std::string> getRequiredExtensions() {
 		u32 glfwextensioncount = {};
 		const char** glfwextensions = {};
@@ -109,52 +90,31 @@ private:
 		return extensions;
 	}
 
-	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-		VkDebugUtilsMessageSeverityFlagBitsEXT messageseverity,
-		VkDebugUtilsMessageTypeFlagsEXT messagetype,
-		const VkDebugUtilsMessengerCallbackDataEXT* pcallbackdata,
-		void* userdata
-	) {
-		std::cerr << "validation layer: " << pcallbackdata->pMessage << std::endl;
-		std::cerr << std::endl;
-		return VK_FALSE;
-	}
-
-	VkResult createDebugUtilsMessengerEXT(
-		VkInstance instance,
-		const VkDebugUtilsMessengerCreateInfoEXT* pdebugcreationinfo,
-		const VkAllocationCallbacks* pallocator,
-		VkDebugUtilsMessengerEXT* pdebugmessenger
-	) {
-		PFN_vkCreateDebugUtilsMessengerEXT func = (PFN_vkCreateDebugUtilsMessengerEXT)(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT"));
-		if (func) {
-			return func(instance, pdebugcreationinfo, pallocator, pdebugmessenger);
-		}
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-
-	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& debugmessengercreationinfo) {
-		debugmessengercreationinfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-		debugmessengercreationinfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-		debugmessengercreationinfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
-		debugmessengercreationinfo.pfnUserCallback = debugCallback;
-		debugmessengercreationinfo.pUserData = nullptr;
-	}
-
 	void setUpDebugMessenger() {
-		VkDebugUtilsMessengerCreateInfoEXT debugmessengercreationinfo = {};
-		populateDebugMessengerCreateInfo(debugmessengercreationinfo);
-		if (createDebugUtilsMessengerEXT(instance.get(), &debugmessengercreationinfo, nullptr, &debug_messenger) != VK_SUCCESS) {
-			throw std::runtime_error("failed to setup debug messenger");
-		}
+		debug_messenger.init(
+			instance,
+			0,
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+			DebugMessenger::debugCallback,
+			nullptr,
+			nullptr
+		);
 	}
 
 	void createInstance() {
-		if (enable_validation_layers && !checkValidationLayerSupport()) {
-			throw std::runtime_error("validation layers requested but not available");
-		}
-
-		instance.init({ 1,4,0 }, { 0,0,1 }, { 0,0,1 }, "vulkan lol", "VulkanOGE", 0, getRequiredExtensions(), nullptr, nullptr);
+		instance.init(
+			{ 1,4,0 }, { 0,0,1 }, { 0,0,1 }, 
+			"vulkan lol", "VulkanOGE", 
+			0, getRequiredExtensions(),
+			validation_layers, 0,
+			VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+			VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+			DebugMessenger::debugCallback,
+			nullptr,
+			nullptr,
+			nullptr
+		);
 	}
 
 	QueueFamilyIndices findAllAvailableQueueFamilies(VkPhysicalDevice physicaldevice) {
@@ -810,9 +770,6 @@ private:
 
 	void cleanUp() {
 		vkDeviceWaitIdle(logical_device);
-		if (enable_validation_layers) {
-			destroyDebugUtilsMessengerEXT(instance.get(), debug_messenger, nullptr);
-		}
 		destroySynchronizationObjects();
 		vkDestroyCommandPool(logical_device, command_pool, nullptr);
 		vkDestroyPipeline(logical_device, graphics_pipeline, nullptr);
